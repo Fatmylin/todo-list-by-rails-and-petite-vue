@@ -152,6 +152,35 @@
       }
     },
 
+    toggleCompleteTodo(todo) {
+      const status = !todo.completed
+      fetch(`${todoListAPI}/${todo.id}`, {
+        method: 'PUT',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          todo_list: {
+            completed: status,
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        todo.completed = status
+        const idx = this.todos.findIndex((listTodo) => listTodo.id == todo.id)
+        this.todos.splice(idx, todo)
+        if (todo.completed) {
+          alert('Todo completed!')
+        } else {
+          alert('Todo uncompleted!')
+        }
+        
+      })
+      .catch((error) => console.log(error))
+    },
+
     cancelEdit(todo) {
       this.editedTodo = null
       todo.body = this.beforeEditCache
@@ -196,7 +225,7 @@
           :class="{ completed: todo.completed, editing: todo === editedTodo }"
         >
           <div class="view">
-            <input class="toggle" type="checkbox" v-model="todo.completed" />
+            <input class="toggle" type="checkbox" :checked="todo.completed" @change="toggleCompleteTodo(todo)"/>
             <label @dblclick="editTodo(todo)">{{ todo.body }}</label>
             <button class="destroy" @click="removeTodo(todo)"></button>
           </div>
