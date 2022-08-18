@@ -12,7 +12,7 @@
   import { createApp } from 'https://unpkg.com/petite-vue?module'
 
   const STORAGE_KEY = 'todos-petite-vue'
-  const getTodoListsAPI = '/api/todo_lists'
+  const todoListAPI = '/api/todo_lists'
   const todoStorage = { 
     save(todos) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
@@ -21,7 +21,6 @@
 
   const filters = {
     all(todos) {
-      console.log(todos)
       return todos
     },
     active(todos) {
@@ -65,10 +64,9 @@
     },
 
     fetchData() {
-      fetch(getTodoListsAPI)
+      fetch(todoListAPI)
         .then((res) => res.json())
         .then((data) => {
-          console.log(data.todo_lists)
           this.todos = data.todo_lists
         })
     },
@@ -76,7 +74,6 @@
     setupRouting() {
       const onHashChange = () => {
         var visibility = window.location.hash.replace(/#\/?/, '')
-        console.log(visibility)
         if (filters[visibility]) {
           this.visibility = visibility
         } else {
@@ -98,11 +95,26 @@
       if (!value) {
         return
       }
-      this.todos.push({
-        id: todoStorage.uid++,
-        title: value,
-        completed: false
+      // send request to backend
+      const csrfToken = document.querySelector("meta[name=csrf-token]").content
+      fetch(todoListAPI, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          todo_list: {
+            body: value,
+            completed: false
+          }
+        })
       })
+      .then(response => response.json())
+      .then(data => this.todos = data.todo_lists)
+      .catch((error) => console.log(errors))
+      // 1. success
+      // 2. fail
       this.newTodo = ''
     },
 
