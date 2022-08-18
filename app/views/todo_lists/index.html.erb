@@ -55,6 +55,8 @@
 
     set allDone(value) {
       const unCompletedTodos = filters.active(this.todos)
+      if (unCompletedTodos === []) return
+
       fetch(`${todoListAPI}/bulk_complete`, {
         method: 'PUT',
         headers: {
@@ -200,7 +202,24 @@
     },
 
     removeCompleted() {
-      this.todos = filters.active(this.todos)
+      const completedTodoIds = filters.completed(this.todos)
+      if (completedTodoIds === []) return
+      
+      fetch(`${todoListAPI}/bulk_uncomplete`, {
+        method: 'PUT',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          todo_list: {
+            ids: completedTodoIds.map((todo) => todo.id),
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => this.todos = data.todo_lists)
+      .catch((error) => console.log(errors))
     },
 
     pluralize(n) {

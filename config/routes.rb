@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   namespace :api do 
     resources :todo_lists do 
       put :bulk_complete, on: :collection
+      put :bulk_uncomplete, on: :collection
     end
   end
 end
