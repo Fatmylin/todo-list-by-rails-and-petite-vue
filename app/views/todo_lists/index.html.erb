@@ -18,7 +18,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
     }
   }
-
+  const csrfToken = document.querySelector("meta[name=csrf-token]").content
   const filters = {
     all(todos) {
       return todos
@@ -96,7 +96,6 @@
         return
       }
       // send request to backend
-      const csrfToken = document.querySelector("meta[name=csrf-token]").content
       fetch(todoListAPI, {
         method: 'POST',
         headers: {
@@ -132,7 +131,22 @@
         return
       }
       this.editedTodo = null
-      todo.body = todo.body.trim()
+      fetch(`${todoListAPI}/${todo.id}`, {
+        method: 'PUT',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          todo_list: {
+            body: todo.body.trim(),
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => alert('Todo updated!'))
+      .catch((error) => console.log(errors))
+
       if (!todo.body) {
         this.removeTodo(todo)
       }
