@@ -21,6 +21,14 @@ module Api
       render json: { error: 'Update todo failed.' }, status: :bad_request
     end
 
+    def bulk_complete
+      todos = TodoList.where(id: todo_list_params[:ids])
+      todos.update_all(completed: true)
+      render json: { todo_lists: TodoList.all }
+    rescue => e
+      render json: { error: 'Update todos failed.' }, status: :bad_request
+    end
+
     private
 
     def todo_list_params

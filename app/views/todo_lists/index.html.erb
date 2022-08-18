@@ -54,9 +54,22 @@
     },
 
     set allDone(value) {
-      this.todos.forEach(function (todo) {
-        todo.completed = value
+      const unCompletedTodos = filters.active(this.todos)
+      fetch(`${todoListAPI}/bulk_complete`, {
+        method: 'PUT',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          todo_list: {
+            ids: unCompletedTodos.map((todo) => todo.id),
+          }
+        })
       })
+      .then(response => response.json())
+      .then(data => this.todos = data.todo_lists)
+      .catch((error) => console.log(errors))
     },
 
     save() {
