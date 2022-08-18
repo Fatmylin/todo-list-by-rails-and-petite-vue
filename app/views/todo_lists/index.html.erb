@@ -12,15 +12,8 @@
   import { createApp } from 'https://unpkg.com/petite-vue?module'
 
   const STORAGE_KEY = 'todos-petite-vue'
-  const todoStorage = {
-    fetch() {
-      const todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-      todos.forEach((todo, index) => {
-        todo.id = index
-      })
-      todoStorage.uid = todos.length
-      return todos
-    },
+  const getTodoListsAPI = '/api/todo_lists'
+  const todoStorage = { 
     save(todos) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
     }
@@ -28,6 +21,7 @@
 
   const filters = {
     all(todos) {
+      console.log(todos)
       return todos
     },
     active(todos) {
@@ -43,7 +37,7 @@
   }
 
   createApp({
-    todos: todoStorage.fetch(),
+    todos: [],
     newTodo: '',
     editedTodo: null,
     visibility: 'all',
@@ -70,6 +64,15 @@
       todoStorage.save(this.todos)
     },
 
+    fetchData() {
+      fetch(getTodoListsAPI)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data.todo_lists)
+          this.todos = data.todo_lists
+        })
+    },
+
     setupRouting() {
       const onHashChange = () => {
         var visibility = window.location.hash.replace(/#\/?/, '')
@@ -83,6 +86,11 @@
       }
       window.addEventListener('hashchange', onHashChange)
       onHashChange()
+    },
+
+    mounted() {
+      this.setupRouting()
+      this.fetchData()
     },
 
     addTodo() {
@@ -103,7 +111,7 @@
     },
 
     editTodo(todo) {
-      this.beforeEditCache = todo.title
+      this.beforeEditCache = todo.body
       this.editedTodo = todo
     },
 
@@ -112,15 +120,15 @@
         return
       }
       this.editedTodo = null
-      todo.title = todo.title.trim()
-      if (!todo.title) {
+      todo.body = todo.body.trim()
+      if (!todo.body) {
         this.removeTodo(todo)
       }
     },
 
     cancelEdit(todo) {
       this.editedTodo = null
-      todo.title = this.beforeEditCache
+      todo.body = this.beforeEditCache
     },
 
     removeCompleted() {
@@ -133,7 +141,7 @@
   }).mount('#app')
 </script>
 
-<div id="app" @vue:mounted="setupRouting" v-effect="save()" v-cloak>
+<div id="app" @vue:mounted="mounted" v-effect="save()" v-cloak>
   <section class="todoapp">
     <header class="header">
       <h1>todos</h1>
@@ -163,13 +171,13 @@
         >
           <div class="view">
             <input class="toggle" type="checkbox" v-model="todo.completed" />
-            <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
+            <label @dblclick="editTodo(todo)">{{ todo.body }}</label>
             <button class="destroy" @click="removeTodo(todo)"></button>
           </div>
           <input
             class="edit"
             type="text"
-            v-model="todo.title"
+            v-model="todo.body"
             v-effect="if (todo === editedTodo) $el.focus()"
             @blur="doneEdit(todo)"
             @keyup.enter="doneEdit(todo)"
@@ -210,4 +218,3 @@
     </footer>
   </section>
 </div>
-  

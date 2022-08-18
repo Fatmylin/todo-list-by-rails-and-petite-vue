@@ -5,4 +5,8 @@ Rails.application.routes.draw do
   # root "articles#index"
 
   resources :todo_lists
+  
+  namespace :api do 
+    resources :todo_lists
+  end
 end
