@@ -9,5 +9,8 @@ Things you may want to cover:
 ```
 ruby 3.0.0
 ```
-* TodoList page `/todo_lists`
 * Check `/assets/javascripts/todo.js` for more detail about petite-vue in this repo.
+* Getting started
+  1. `bundle install`
+  2. `rake db:migrate`
+  3. Go to TodoList page: `/todo_lists`
