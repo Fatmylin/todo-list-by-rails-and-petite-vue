@@ -7,7 +7,6 @@
     display: none;
   }
 </style>
-<%= javascript_include_tag "todo", type: "module" %>
 <div id="app" @vue:mounted="mounted" v-effect="save()" v-cloak>
   <section class="todoapp">
     <header class="header">
